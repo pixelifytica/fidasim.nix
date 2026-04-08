@@ -36,6 +36,7 @@
             tag = "v${version}";
             hash = "sha256-/w5dqCwqn2bIsTi6ieLdKZb/uAHFvsB7S4s72S02pNI=";
           };
+          patches = [ ./scipy.patch ];
           nativeBuildInputs = with pkgs.${system}; [
             gnumake
             gfortran
@@ -60,6 +61,22 @@
             mkdir -p $out/
             mv * $out/
           '';
+        };
+      });
+      devShells = forAllSystems (system: {
+        default = pkgs.${system}.mkShellNoCC {
+          packages = [
+            self.packages.${system}.fidasim
+            (pkgs.${system}.python3.withPackages (
+              ps: with ps; [
+                numpy
+                scipy
+                scikit-image
+                h5py
+              ]
+            ))
+          ];
+          env.PYTHONPATH = "${self.packages.${system}.fidasim.out}/lib/python";
         };
       });
     };

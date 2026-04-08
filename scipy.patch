@@ -1,0 +1,53 @@
+diff --git a/lib/python/efit/utils.py b/lib/python/efit/utils.py
+index d374175e..86d4dfa1 100644
+--- a/lib/python/efit/utils.py
++++ b/lib/python/efit/utils.py
+@@ -3,7 +3,7 @@
+ 
+ import numpy as np
+ import scipy.interpolate
+-from scipy.integrate import cumtrapz
++from scipy.integrate import cumulative_trapezoid
+ from skimage.measure import find_contours
+ 
+ def fluxmap(g):
+@@ -18,7 +18,7 @@ def fluxmap(g):
+     nint = 100
+     psi = np.linspace(0,psi_eqdsk[-1],100)
+     q = scipy.interpolate.interp1d(psi_eqdsk, q_eqdsk,'cubic')(psi)
+-    flux = 2*cumtrapz(q,psi,initial=0.0)*np.abs(dpsi)
++    flux = 2*cumulative_trapezoid(q,psi,initial=0.0)*np.abs(dpsi)
+ 
+     pts = 101
+     theta = np.linspace(0,2*np.pi,pts,endpoint=False)
+@@ -81,7 +81,7 @@ def rho_rz(g,r_pts,z_pts,norm=True):
+     x_pts = r_pts.flatten()
+     y_pts = z_pts.flatten()
+ 
+-    psirz = scipy.interpolate.interp2d(r,z,g['psirz'],'cubic')
++    psirz = scipy.interpolate.RectBivariateSpline(r,z,g['psirz'])
+     psi_pts = np.array([psirz(x,y) for (x,y) in zip(x_pts,y_pts)])
+ 
+     a = fluxmap(g)
+diff --git a/lib/python/fidasim/utils.py b/lib/python/fidasim/utils.py
+index 3892fe7d..ec01f064 100644
+--- a/lib/python/fidasim/utils.py
++++ b/lib/python/fidasim/utils.py
+@@ -14,7 +14,7 @@ import copy
+ import h5py
+ import efit
+ from scipy.io import netcdf
+-from scipy.interpolate import interp1d, interp2d, NearestNDInterpolator
++from scipy.interpolate import interp1d, RectBivariateSpline, NearestNDInterpolator
+ from scipy.spatial import Delaunay
+ import matplotlib.pyplot as plt
+ 
+@@ -709,7 +709,7 @@ def read_geqdsk(filename, grid, poloidal=False):
+ 
+     psi_arr = np.linspace(psiaxis, psiwall, len(fpol))
+     fpol_itp = interp1d(psi_arr, fpol, 'cubic', fill_value=fpol[-1],bounds_error=False)
+-    psirz_itp = interp2d(r, z, g["psirz"], 'cubic')
++    psirz_itp = RectBivariateSpline(r, z, g["psirz"])
+ 
+     if poloidal:
+         rhogrid = np.array([psirz_itp(rr,zz) for (rr,zz) in zip(r_pts,z_pts)]).reshape(dims)
