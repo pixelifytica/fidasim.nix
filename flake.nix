@@ -37,22 +37,19 @@
             hash = "sha256-/w5dqCwqn2bIsTi6ieLdKZb/uAHFvsB7S4s72S02pNI=";
           };
           patches = [ ./scipy.patch ];
-          nativeBuildInputs = with pkgs.${system}; [
-            gnumake
-            gfortran
-            zlib
-            python3
-            hdf5-fortran
-            git
+          nativeBuildInputs =
+            (with pkgs.${system}; [
+              gnumake
+              gfortran
+              zlib
+              python3
+              git
+            ])
+            ++ [ self.packages.${system}.hdf5 ];
+          makeFlags = [
+            "HDF5_LIB=${self.packages.${system}.hdf5.out}/lib"
+            "HDF5_INCLUDE=${self.packages.${system}.hdf5.dev}/include"
           ];
-          makeFlags =
-            let
-
-            in
-            [
-              "HDF5_LIB=${self.packages.${system}.hdf5.out}/lib"
-              "HDF5_INCLUDE=${self.packages.${system}.hdf5.dev}/include"
-            ];
           buildFlags = [
             "src"
             "tables"
