@@ -6,13 +6,7 @@
     let
       supportedSystems = [ "x86_64-linux" ];
       forAllSystems = nixpkgs.lib.genAttrs supportedSystems;
-      pkgs = forAllSystems (
-        system:
-        import nixpkgs {
-          inherit system;
-          overlays = [ ];
-        }
-      );
+      pkgs = forAllSystems (system: import nixpkgs { inherit system; });
     in
     {
       packages = forAllSystems (system: {
@@ -27,13 +21,13 @@
               dontDisableStatic = true;
               configureFlags = prev.configureFlags ++ [ "--enable-fortran" ];
             });
-        fidasim = pkgs.${system}.stdenv.mkDerivation rec {
+        fidasim = pkgs.${system}.stdenv.mkDerivation (final: {
           pname = "fidasim";
           version = "2.0.0";
           src = pkgs.${system}.fetchFromGitHub {
             owner = "D3DEnergetic";
             repo = "FIDASIM";
-            tag = "v${version}";
+            tag = "v${final.version}";
             hash = "sha256-/w5dqCwqn2bIsTi6ieLdKZb/uAHFvsB7S4s72S02pNI=";
           };
           patches = [ ./scipy.patch ];
@@ -55,10 +49,16 @@
             "tables"
           ];
           installPhase = ''
-            mkdir -p $out/
-            mv * $out/
+            mkdir -p $out/bin
+            cp fidasim tables/generate_tables $out/bin
+            cp -R lib tables test docs $out
           '';
-        };
+          meta = {
+            homepage = "https://d3denergetic.github.io/FIDASIM/index.html";
+            licence = pkgs.lib.licence.bsd3;
+            mainProgram = "fidasim";
+          };
+        });
       });
       devShells = forAllSystems (system: {
         default = pkgs.${system}.mkShellNoCC {
@@ -73,7 +73,7 @@
               ]
             ))
           ];
-          env.PYTHONPATH = "${self.packages.${system}.fidasim.out}/lib/python";
+          env.PYTHONPATH = "${self.packages.${system}.fidasim}/lib/python";
         };
       });
     };
