@@ -1,3 +1,4 @@
-/result
-/hdf5*
+/fidasim
+/hdf5
+/hdf5-dev
 /atomic_tables.h5
