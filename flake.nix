@@ -42,7 +42,10 @@
             inherit src;
             pname = "fidasim";
             version = "2.0.0";
-            patches = [ ./scipy.patch ];
+            patches = [
+              ./numpy.patch
+              ./scipy.patch
+            ];
             buildInputs =
               (with pkgs.${system}; [
                 gnumake

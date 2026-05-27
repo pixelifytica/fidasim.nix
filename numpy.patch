@@ -1,0 +1,13 @@
+diff --git a/lib/python/fidasim/utils.py b/lib/python/fidasim/utils.py
+index 3892fe7d..c7d7fcd5 100644
+--- a/lib/python/fidasim/utils.py
++++ b/lib/python/fidasim/utils.py
+@@ -661,7 +661,7 @@ def write_data(h5_obj, dic, desc=dict(), units=dict(), name=''):
+         # Make strings of fixed length as required by Fortran.
+         # See http://docs.h5py.org/en/latest/strings.html#fixed-length-ascii
+         if isinstance(dic[key], str):
+-            dic[key] = np.string_(dic[key])
++            dic[key] = np.bytes_(dic[key])
+ 
+         # Create dataset
+         ds = h5_obj.create_dataset(key, data = dic[key])
